@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index(Request $request, $length = 1) {
         $users = TwitterUser::whereStatus(TwitterAccountStatus::FREE)->whereRaw('LENGTH(username) = ?', [$length])->get();
-        if($users->isEmpty()) {
+        if($users->isEmpty() && $length > 1) {
             return redirect('/');
         }
         $lengths = TwitterUser::select(DB::raw('CHAR_LENGTH(username) as length'))->orderBy('length')->groupBy('length')->get()->pluck('length')->toArray();
