@@ -26,16 +26,6 @@ class CheckTwitterNames extends Command
     protected $description = 'Chooses some Twitter names to check up on and saves the information to the DB.';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
