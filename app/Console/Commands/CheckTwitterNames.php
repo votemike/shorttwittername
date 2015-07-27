@@ -34,23 +34,23 @@ class CheckTwitterNames extends Command
     {
         $usernames = $this->selectUsernames()->pluck('username');
         $users = Twitter::lookup($usernames);
+
         if($users->isEmpty()) {
-            foreach($usernames as $username) {
-                $twitterUser = TwitterUser::where('username', $username)->first();
-                $twitterUser->status = Twitter::getUsernameStatus($username);
-                if($twitterUser->status == TwitterAccountStatus::FREE) {
-                    $twitterUser->name = null;
-                    $twitterUser->profile_pic = null;
-                    $twitterUser->date_registered = null;
-                }
-                $twitterUser->last_checked = Carbon::now();
-                $twitterUser->save();
-            }
+            $this->saveNonActiveUsers($usernames);
             return;
         }
 
-        foreach($users as $user) {
-            $twitterUser = TwitterUser::where('username', strtolower($user->screen_name))->first();
+        $this->saveActiveUsers($users);
+
+        $active = array_map('strtolower', $users->pluck('screen_name')->toArray());
+        $notActive = array_diff($usernames->toArray(), $active);
+
+        $this->saveNonActiveUsers($notActive);
+    }
+
+    private function saveActiveUsers($active) {
+        foreach($active as $user) {
+            $twitterUser = TwitterUser::whereUsername(strtolower($user->screen_name))->first();
             $twitterUser->name = $user->name;
             $twitterUser->profile_pic = str_replace('normal', 'bigger', $user->profile_image_url);
             $twitterUser->status = TwitterAccountStatus::ACTIVE;
@@ -58,18 +58,15 @@ class CheckTwitterNames extends Command
             $twitterUser->last_checked = Carbon::now();
             $twitterUser->save();
         }
+    }
 
-        $exists = array_map('strtolower', $users->pluck('screen_name')->toArray());
-        $dontexist = array_diff($usernames->toArray(),$exists);
-
-        foreach($dontexist as $dont) {
-            $twitterUser = TwitterUser::whereUsername($dont)->first();
-            $twitterUser->status = Twitter::getUsernameStatus($dont);
-            if($twitterUser->status == TwitterAccountStatus::FREE) {
-                $twitterUser->name = null;
-                $twitterUser->profile_pic = null;
-                $twitterUser->date_registered = null;
-            }
+    private function saveNonActiveUsers($notActive) {
+        foreach($notActive as $user) {
+            $twitterUser = TwitterUser::whereUsername($user)->first();
+            $twitterUser->status = Twitter::getUsernameStatus($user);
+            $twitterUser->name = null;
+            $twitterUser->profile_pic = null;
+            $twitterUser->date_registered = null;
             $twitterUser->last_checked = Carbon::now();
             $twitterUser->save();
         }
