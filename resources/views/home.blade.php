@@ -19,6 +19,7 @@
         </div>
     @empty
         <div><strong>No Free Usernames Found</strong></div>
+        <div>The last {{ $length }} character name available was "{{ $last->username }}" snapped up on {{ $last->date_registered }}</div>
         <div><a href="{{ url('/all/'.$length) }}">Show all users</a></div>
     @endforelse
 @endsection

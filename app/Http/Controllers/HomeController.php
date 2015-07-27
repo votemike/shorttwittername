@@ -12,8 +12,12 @@ class HomeController extends Controller
             return redirect('/');
         }
         $users = TwitterUser::free()->whereUsernameLength($length)->get();
+        $last = null;
+        if($users->isEmpty()) {
+            $last = TwitterUser::whereUsernameLength($length)->orderBy('date_registered', 'DESC')->first();
+        }
         $lengths = TwitterUser::selectUsernameLength()->orderBy('length')->groupBy('length')->get()->pluck('length')->toArray();
-        return view('home')->withUsers($users)->withLengths($lengths)->withLength((int)$length);
+        return view('home')->withUsers($users)->withLengths($lengths)->withLength((int)$length)->withLast($last);
     }
 
     public function all(Request $request, $length = 1) {
