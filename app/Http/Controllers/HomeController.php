@@ -13,7 +13,7 @@ class HomeController extends Controller
         }
         $users = TwitterUser::free()->whereUsernameLength($length)->get();
         $last = null;
-        if($users->isEmpty() && TwitterUser::notRetrieved()->whereUsernameLength($length)->get()->isEmpty()) {
+        if($users->isEmpty() && TwitterUser::notRetrieved()->whereUsernameLength($length)->count() == 0) {
             $last = TwitterUser::whereUsernameLength($length)->orderBy('date_registered', 'DESC')->first();
         }
         $lengths = TwitterUser::selectUsernameLength()->orderBy('length')->groupBy('length')->get()->pluck('length')->toArray();
