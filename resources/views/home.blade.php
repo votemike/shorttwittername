@@ -1,6 +1,7 @@
 @extends('layout.app')
 
 @section('content')
+    <div>Name length</div>
     <ul class="pagination">
         @foreach($lengths as $l)
             <li {{ ($l == $length) ? 'class=active' : ''  }}><a href="{{ url('/'.$l) }}">{{ $l }}</a></li>
@@ -14,12 +15,12 @@
                     <div class="username">{{ $username->username }}</div>
                     <div class="name">{{ $username->name }}</div>
                     <div class="status">{{ $username->status }}</div>
-                    <div class="last-checked">{{ $username->last_checked }}</div>
+                    <div class="last-checked" title="Last date checked">{{ $username->last_checked }}</div>
                     <div class="registered">{{ $username->date_registered }}</div>
                 </a>
             @endforeach
         </div>
     @empty
-        <div><strong>No Usernames Found</strong></div>
+        <div><strong>No Free Usernames Found</strong></div>
     @endforelse
 @endsection
