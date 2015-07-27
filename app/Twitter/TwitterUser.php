@@ -49,6 +49,10 @@ class TwitterUser extends Model
         return $query->whereStatus(TwitterAccountStatus::FREE);
     }
 
+    public function scopeNotRetrieved($query) {
+        return $query->whereStatus(TwitterAccountStatus::NOT_RETRIEVED);
+    }
+
     public function scopeSelectUsernameLength($query) {
         return $query->select(DB::raw('CHAR_LENGTH(username) as length'));
     }

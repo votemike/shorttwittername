@@ -18,8 +18,12 @@
             @endforeach
         </div>
     @empty
-        <div><strong>No Free Usernames Found</strong></div>
-        <div>The last {{ $length }} character name available was "{{ $last->username }}" snapped up on {{ $last->date_registered }}</div>
+        <div><strong>No Available Usernames Found</strong></div>
+        @if($last == null)
+            <div>However, there are still usernames this length that are still being checked</div>
+        @else
+            <div>The last {{ $length }} character name available was "{{ $last->username }}" snapped up on {{ $last->date_registered }}</div>
+        @endif
         <div><a href="{{ url('/all/'.$length) }}">Show all users</a></div>
     @endforelse
 @endsection
