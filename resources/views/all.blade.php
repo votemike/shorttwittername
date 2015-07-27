@@ -13,12 +13,15 @@
                 <a class="col-md-1 col-sm-2 col-xs-3" href="http://twitter.com/{{ $username->username }}">
                     <div class="pic-container"><img src="{{ $username->profile_pic }}" class="img-responsive"/></div>
                     <div class="username">{{ $username->username }}</div>
+                    <div class="name">{{ $username->name }}</div>
+                    <div class="status">{{ $username->status }}</div>
                     <div class="last-checked" title="Last date checked">{{ $username->last_checked }}</div>
+                    <div class="registered" title="Date registered">{{ $username->date_registered }}</div>
                 </a>
             @endforeach
         </div>
     @empty
-        <div><strong>No Free Usernames Found</strong></div>
-        <div><a href="{{ url('/all/'.$length) }}">Show all users</a></div>
+        <div><strong>No usernames this long found</strong></div>
     @endforelse
+    {!! $users->render() !!}
 @endsection

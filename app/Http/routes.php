@@ -10,5 +10,5 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-
-Route::get('/{length?}', 'HomeController@index');
+Route::get('/all/{length?}', 'HomeController@all')->where('length', '[0-9]+');;
+Route::get('/{length?}', 'HomeController@index')->where('length', '[0-9]+');;

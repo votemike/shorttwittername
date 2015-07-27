@@ -3,6 +3,7 @@
 namespace App\Twitter;
 
 use Carbon\Carbon;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 
 class TwitterUser extends Model
@@ -46,5 +47,13 @@ class TwitterUser extends Model
 
     public function scopeFree($query) {
         return $query->whereStatus(TwitterAccountStatus::FREE);
+    }
+
+    public function scopeSelectUsernameLength($query) {
+        return $query->select(DB::raw('CHAR_LENGTH(username) as length'));
+    }
+
+    public function scopeWhereUsernameLength($query, $length) {
+        return $query->whereRaw('LENGTH(username) = ?', [$length]);
     }
 }
