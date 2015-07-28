@@ -37,7 +37,7 @@ class TwitterAccountStatus
             case self::SUSPENDED:
                 return 'suspended';
             case self::FREE:
-                return 'free';
+                return 'available';
             case self::DEACTIVATED:
                 return 'deactivated';
             case self::NOT_RETRIEVED:

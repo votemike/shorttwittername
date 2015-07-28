@@ -29,6 +29,9 @@ class TwitterUser extends Model
 
     public function getProfilePicAttribute($value) {
         if(empty($value)) {
+            if($this->getAttributeFromArray('status') == TwitterAccountStatus::FREE) {
+                return asset('images/icons/available.png');
+            }
             return asset('images/icons/notallowed.svg');
         }
 
