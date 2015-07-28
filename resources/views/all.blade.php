@@ -10,7 +10,7 @@
     @forelse($users->chunk(12) as $chunk)
         <div class="row">
             @foreach($chunk as $username)
-                <a class="col-md-1 col-sm-2 col-xs-3" href="http://twitter.com/{{ $username->username }}">
+                <a class="col-md-1 col-sm-2 col-xs-3" href="http://twitter.com/{{ $username->username }}"  target="_blank">
                     <div class="pic-container"><img src="{{ $username->profile_pic }}" class="img-responsive"/></div>
                     <div class="username">{{ $username->username }}</div>
                     <div class="name">{{ $username->name }}</div>

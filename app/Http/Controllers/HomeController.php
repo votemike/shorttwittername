@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    /**
+     * Show free usernames of a certain length
+     *
+     * @param Request $request
+     * @param int $length
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function index(Request $request, $length = 1) {
         if(TwitterUser::whereUsernameLength($length)->count() == 0 && $length > 1) {
             return redirect('/');
@@ -20,6 +27,13 @@ class HomeController extends Controller
         return view('home')->withUsers($users)->withLengths($lengths)->withLength((int)$length)->withLast($last);
     }
 
+    /**
+     * Show details of all usernames of a certain length
+     *
+     * @param Request $request
+     * @param int $length
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function all(Request $request, $length = 1) {
         if(TwitterUser::whereUsernameLength($length)->count() == 0 && $length > 1) {
             return redirect('/all');

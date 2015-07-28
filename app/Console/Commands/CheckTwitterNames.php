@@ -48,6 +48,11 @@ class CheckTwitterNames extends Command
         $this->saveNonActiveUsers($notActive);
     }
 
+    /**
+     * Save a non active user
+     *
+     * @param $active
+     */
     private function saveActiveUsers($active) {
         foreach($active as $user) {
             $twitterUser = TwitterUser::whereUsername(strtolower($user->screen_name))->first();
@@ -60,6 +65,11 @@ class CheckTwitterNames extends Command
         }
     }
 
+    /**
+     * Save a non active user (available, suspended, deactivated etc...)
+     *
+     * @param $notActive
+     */
     private function saveNonActiveUsers($notActive) {
         foreach($notActive as $user) {
             $twitterUser = TwitterUser::whereUsername($user)->first();
@@ -72,6 +82,12 @@ class CheckTwitterNames extends Command
         }
     }
 
+    /**
+     * Choose which usernames to query next
+     * If there are no free usernames at the moment, increae the length of the possible usernames by 1
+     *
+     * @return mixed
+     */
     private function selectUsernames() {
         $toCheck = TwitterUser::neverQueried();
 
@@ -86,24 +102,39 @@ class CheckTwitterNames extends Command
         return TwitterUser::neverQueried()->take(100)->get();
     }
 
+    /**
+     * Create all possible strings of a certain length and save them
+     *
+     * @param $length
+     */
     private function populateDatabaseWithUsernamesOfLength($length) {
         $strings = $this->makeStrings($length);
 
         $chunks = array_chunk($strings, 100);
         foreach($chunks as $chunk) {
-            $toInsert = $this->convertChunkToInsert($chunk);
-            DB::table('twitter_users')->insert($toInsert);
+            $this->saveChunk($chunk);
         }
     }
 
-    private function convertChunkToInsert($chunk) {
+    /**
+     * Parse and save a chunk of usernames
+     *
+     * @param $chunk
+     */
+    private function saveChunk($chunk) {
         $toInsert = [];
         foreach($chunk as $item) {
             $toInsert[] = ['username' => $item, 'status' => TwitterAccountStatus::NOT_RETRIEVED];
         }
-        return $toInsert;
+        DB::table('twitter_users')->insert($toInsert);
     }
 
+    /**
+     * Make an array of all possible strings of a certain length
+     *
+     * @param $length
+     * @return array
+     */
     private function makeStrings($length) {
         $chars = str_split('abcdefghijklmnopqrstuvwxyz1234567890_');
 
@@ -123,6 +154,11 @@ class CheckTwitterNames extends Command
         return $finalStrings;
     }
 
+    /**
+     * Get the current longest username
+     *
+     * @return int
+     */
     private function getLongestUsernameLength() {
         if(TwitterUser::count() == 0) {
             return 0;
