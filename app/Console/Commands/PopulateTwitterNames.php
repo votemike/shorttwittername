@@ -25,7 +25,8 @@ class PopulateTwitterNames extends Command
     protected $description = 'Gradually populates the database with usernames to check';
 
     /**
-     * Execute the console command.
+     * 37^x are big numbers, we need to incrementally add every permutation of allowed
+     * Twitter username characters.
      *
      * @return mixed
      */
@@ -33,9 +34,7 @@ class PopulateTwitterNames extends Command
     {
         DB::connection()->disableQueryLog();
 
-        $complete = $this->currentUsernameLengthComplete();
-
-        if($complete && (TwitterUser::neverQueried()->count() > 0 || TwitterUser::free()->count() > 0)) {
+        if(!$this->populateMoreUsernames()) {
             return;
         }
 
@@ -44,6 +43,11 @@ class PopulateTwitterNames extends Command
         $this->saveNextPrefix($prefix);
     }
 
+    /**
+     * Adds more usernames to the database ready to be checked (if necessary)
+     *
+     * @param $prefix
+     */
     private function populateDatabaseWithUsernames($prefix) {
         $chars = str_split('abcdefghijklmnopqrstuvwxyz1234567890_');
 
@@ -55,17 +59,28 @@ class PopulateTwitterNames extends Command
         DB::table('twitter_users')->insert($usernames);
     }
 
+    /**
+     * Saves the next prefix for usernames being saved to the database
+     *
+     * @param $currentPrefix
+     */
     private function saveNextPrefix($currentPrefix) {
-        $chars = str_split($currentPrefix);
-        $nextPrefix = $this->reJig($chars);
+        $nextPrefix = $this->getNextPrefix($currentPrefix);
 
         $config = TwitterConfig::whereName('prefix')->first();
-        $config->value = implode('', $nextPrefix);
+        $config->value = $nextPrefix;
         $config->save();
     }
 
-    private function reJig($charArray) {
-        $reversed = array_reverse($charArray);
+    /**
+     * Increments the prefix to be added to new usernames
+     *
+     * @param $currentPrefix
+     * @return string
+     */
+    private function getNextPrefix($currentPrefix) {
+        $chars = str_split($currentPrefix);
+        $reversed = array_reverse($chars);
 
         $increment = true;
         foreach($reversed as $key => $char) {
@@ -81,17 +96,15 @@ class PopulateTwitterNames extends Command
             $reversed[] = 'a';
         }
 
-        return array_reverse($reversed);
+        return implode('', array_reverse($reversed));
     }
 
-    private function currentUsernameLengthComplete() {
-        $currentLength = TwitterUser::select(DB::raw('MAX(CHAR_LENGTH(username)) as Max'))->pluck('Max');
-        if(is_null($currentLength)) {
-            return false;
-        }
-        return TwitterUser::whereUsername(str_repeat('_', $currentLength))->exists();
-    }
-
+    /**
+     * Increments a characted e.g. c->d, d-e, _->a
+     *
+     * @param $char
+     * @return string
+     */
     private function incrementChar($char) {
         if($char == '' || $char == '_') {
             return 'a';
@@ -100,5 +113,26 @@ class PopulateTwitterNames extends Command
         $key = array_search($char, $chars);
 
         return $chars[$key+1];
+    }
+
+    /**
+     * Decides of any more usernames should be added to the database
+     * Will add more if any more of the same length need to be added
+     * Won't add more if above condition passes and there are some usernames still to check or some available usernames
+     *
+     * @return bool
+     */
+    private function populateMoreUsernames() {
+        $currentLength = TwitterUser::select(DB::raw('MAX(CHAR_LENGTH(username)) as Max'))->pluck('Max');
+
+        if(is_null($currentLength) || !TwitterUser::whereUsername(str_repeat('_', $currentLength))->exists()) {
+            return true;
+        }
+
+        if(TwitterUser::neverQueried()->count() > 0 || TwitterUser::free()->count() > 0) {
+            return false;
+        }
+
+        return true;
     }
 }
