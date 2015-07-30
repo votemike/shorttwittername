@@ -30,6 +30,6 @@ class Kernel extends ConsoleKernel
             ->everyMinute();
 
         $schedule->command('twitter:checknames')
-            ->everyTenMinutes();
+            ->everyFiveMinutes();
     }
 }
