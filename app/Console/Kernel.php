@@ -27,9 +27,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('twitter:populatenames')
-            ->everyMinute();
+            ->everyMinute()->withoutOverlapping();
 
         $schedule->command('twitter:checknames')
-            ->everyFiveMinutes();
+            ->everyFiveMinutes()->withoutOverlapping();
     }
 }
